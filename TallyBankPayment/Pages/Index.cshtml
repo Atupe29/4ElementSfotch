@@ -1,0 +1,229 @@
+@page
+@model TallyBankPayment.Pages.IndexModel
+@{
+    ViewData["Title"] = "Bank Payment Voucher Entry";
+}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <title>Bank Payment Voucher Entry</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <style>
+        body { font-family: Arial, sans-serif; line-height: 1.6; margin: 0; padding: 20px; background-color: #f5f5f5; }
+        .container { max-width: 1000px; margin: 0 auto; background-color: white; padding: 20px; border-radius: 5px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
+        h1, h2 { color: #333; }
+        .form-group { margin-bottom: 15px; }
+        label { display: block; margin-bottom: 5px; font-weight: bold; }
+        input, textarea, select { width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box; }
+        button { background-color: #4CAF50; color: white; padding: 10px 15px; border: none; border-radius: 4px; cursor: pointer; font-size: 16px; }
+        button:hover { background-color: #45a049; }
+        .response { margin-top: 20px; padding: 15px; border-radius: 4px; }
+        .success { background-color: #dff0d8; color: #3c763d; border: 1px solid #d6e9c6; }
+        .error { background-color: #f2dede; color: #a94442; border: 1px solid #ebccd1; }
+        .xml-preview { margin-top: 20px; padding: 15px; background-color: #f0f0f0; border-radius: 4px; font-family: monospace; white-space: pre-wrap; max-height: 300px; overflow-y: auto; }
+        .form-row { display: flex; gap: 15px; }
+        .form-row .form-group { flex: 1; }
+        .response-details { margin-top: 10px; padding: 10px; background-color: #f8f9fa; border-radius: 4px; }
+        .section { margin-top: 20px; padding: 15px; background-color: #f8f9fa; border-radius: 4px; }
+        .section h2 { margin-top: 0; color: #2c3e50; }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>Bank Payment Voucher Entry</h1>
+
+    @if (Model.ResponseMessage is not null)
+    {
+        <div class="response @(Model.IsSuccess ? "success" : "error")">
+            <h3>@(Model.IsSuccess ? "Success!" : "Error!")</h3>
+            <p>@Model.ResponseMessage</p>
+
+            @if (Model.ShowDetails || !Model.IsSuccess)
+            {
+                <div class="response-details">
+                    <h4>Details:</h4>
+                    @if (Model.TallyResponse is not null)
+                    {
+                        <p><strong>HTTP Status:</strong> @Model.TallyResponse.Status</p>
+                        @if (!string.IsNullOrWhiteSpace(Model.TallyMessage))
+                        {
+                            <p><strong>Tally Message:</strong> @Model.TallyMessage</p>
+                        }
+                        @if (!string.IsNullOrWhiteSpace(Model.TallyResponse.Error))
+                        {
+                            <p><strong>Connection Error:</strong> @Model.TallyResponse.Error</p>
+                        }
+                    }
+                </div>
+            }
+        </div>
+
+        <div class="xml-preview">
+            <h3>XML Sent to Tally:</h3>
+            <pre>@(Model.XmlData)</pre>
+
+            @if (Model.TallyResponse?.Success == true && !string.IsNullOrWhiteSpace(Model.TallyResponse.Response))
+            {
+                <h3 style="margin-top: 20px;">Tally Response:</h3>
+                <pre>@Model.TallyResponse.Response</pre>
+            }
+        </div>
+    }
+
+    <form method="post" action="">
+        <div class="section">
+            <h2>Basic Information</h2>
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="voucher_number">Voucher Number:</label>
+                    <input type="text" id="voucher_number" name="VoucherData.VoucherNumber" value="@Model.VoucherData.VoucherNumber" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="date">Date (YYYYMMDD):</label>
+                    <input type="text" id="date" name="VoucherData.Date" value="@Model.VoucherData.Date" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="voucher_type">Voucher Type:</label>
+                    <select id="voucher_type" name="VoucherData.VoucherType" asp-items="Model.VoucherTypeOptions" required></select>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="narration">Narration:</label>
+                <textarea id="narration" name="VoucherData.Narration" rows="3" required>@Model.VoucherData.Narration</textarea>
+            </div>
+
+            <div class="form-group">
+                <label for="entered_by">Entered By:</label>
+                <input type="text" id="entered_by" name="VoucherData.EnteredBy" value="@Model.VoucherData.EnteredBy" required>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>Party Information</h2>
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="party_ledger">Party Ledger Name:</label>
+                    <input type="text" id="party_ledger" name="VoucherData.PartyLedger" value="@Model.VoucherData.PartyLedger" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="party_name">Party Name:</label>
+                    <input type="text" id="party_name" name="VoucherData.PartyName" value="@Model.VoucherData.PartyName" required>
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="bill_no">Bill/Reference No:</label>
+                    <input type="text" id="bill_no" name="VoucherData.BillNo" value="@Model.VoucherData.BillNo" required>
+                </div>
+
+                <div class="form-group">
+                    <label for="bill_date">Bill Date (DD-MMM-YY):</label>
+                    <input type="text" id="bill_date" name="VoucherData.BillDate" value="@Model.VoucherData.BillDate">
+                </div>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>Bank Information</h2>
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="bank_account">Bank Account:</label>
+                    <select id="bank_account" name="VoucherData.BankAccount" asp-items="Model.BankAccountOptions" required></select>
+                </div>
+
+                <div class="form-group">
+                    <label for="amount">Amount:</label>
+                    <input type="number" id="amount" name="VoucherData.Amount" step="0.01" value="@(Model.VoucherData.Amount.ToString("0.00", System.Globalization.CultureInfo.InvariantCulture))" required>
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="payment_mode">Payment Mode:</label>
+                    <select id="payment_mode" name="VoucherData.PaymentMode" asp-items="Model.PaymentModeOptions" required></select>
+                </div>
+
+                <div class="form-group">
+                    <label for="instrument_no">Cheque/DD/Ref No:</label>
+                    <input type="text" id="instrument_no" name="VoucherData.InstrumentNo" value="@Model.VoucherData.InstrumentNo">
+                </div>
+
+                <div class="form-group">
+                    <label for="instrument_date">Instrument Date (YYYYMMDD):</label>
+                    <input type="text" id="instrument_date" name="VoucherData.InstrumentDate" value="@Model.VoucherData.InstrumentDate">
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="payment_favouring">Payment Favouring:</label>
+                    <input type="text" id="payment_favouring" name="VoucherData.PaymentFavouring" value="@Model.VoucherData.PaymentFavouring">
+                </div>
+
+                <div class="form-group">
+                    <label for="transaction_type">Transaction Type:</label>
+                    <input type="text" id="transaction_type" name="VoucherData.TransactionType" value="@Model.VoucherData.TransactionType">
+                </div>
+
+                <div class="form-group">
+                    <label for="transfer_mode">Transfer Mode:</label>
+                    <input type="text" id="transfer_mode" name="VoucherData.TransferMode" value="@Model.VoucherData.TransferMode">
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="unique_reference">Unique Reference Number:</label>
+                <input type="text" id="unique_reference" name="VoucherData.UniqueReference" value="@Model.VoucherData.UniqueReference">
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>Additional Information</h2>
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="cost_center">Cost Center:</label>
+                    <input type="text" id="cost_center" name="VoucherData.CostCenter" value="@Model.VoucherData.CostCenter">
+                </div>
+
+                <div class="form-group">
+                    <label for="gst_registration_type">GST Registration Type:</label>
+                    <select id="gst_registration_type" name="VoucherData.GstRegistrationType" asp-items="Model.GstRegistrationTypeOptions"></select>
+                </div>
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="state_name">State Name:</label>
+                    <input type="text" id="state_name" name="VoucherData.StateName" value="@Model.VoucherData.StateName">
+                </div>
+
+                <div class="form-group">
+                    <label for="place_of_supply">Place of Supply:</label>
+                    <input type="text" id="place_of_supply" name="VoucherData.PlaceOfSupply" value="@Model.VoucherData.PlaceOfSupply">
+                </div>
+            </div>
+        </div>
+
+        <button type="submit">Create Bank Payment in Tally</button>
+    </form>
+
+    <div style="margin-top: 30px; padding: 15px; background-color: #e7f3fe; border-radius: 4px;">
+        <h3>Tally Configuration Instructions</h3>
+        <ol>
+            <li>Ensure Tally.ERP 9/Prime is running with ODBC/HTTP server enabled</li>
+            <li>Set server port to 9000 (or update in code)</li>
+            <li>Ensure company "SHREE AMBIKA PRINTERS AND PUBLICATIONS" exists and is loaded</li>
+            <li>Verify ledgers exist (e.g., BEST UNDERTAKING-MUMBAI, SBI MUMBAI-57615)</li>
+            <li>Check Tally logs for details if issues occur</li>
+        </ol>
+    </div>
+</div>
+</body>
+</html>
