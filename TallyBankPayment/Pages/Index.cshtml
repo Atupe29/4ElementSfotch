@@ -1,0 +1,224 @@
+@page
+@model IndexModel
+@{
+    ViewData["Title"] = "Bank Payment Voucher Entry";
+}
+
+<div class="container">
+    <h1>Bank Payment Voucher Entry</h1>
+
+    @if (Model.Submitted)
+    {
+        <div class="response @(Model.IsSuccess ? "success" : "error")">
+            <h3>@(Model.IsSuccess ? "Success!" : "Error!")</h3>
+            <p>@Model.ResponseMessage</p>
+            @if (Model.ShowDetails || !Model.IsSuccess)
+            {
+                <div class="response-details">
+                    <h4>Details:</h4>
+                    <p><strong>HTTP Status:</strong> @Model.HttpStatus</p>
+                    @if (!string.IsNullOrEmpty(Model.TallyMessage))
+                    {
+                        <p><strong>Tally Message:</strong> @Model.TallyMessage</p>
+                    }
+                    @if (!string.IsNullOrEmpty(Model.ConnectionError))
+                    {
+                        <p><strong>Connection Error:</strong> @Model.ConnectionError</p>
+                    }
+                </div>
+            }
+        </div>
+
+        <div class="xml-preview">
+            <h3>XML Sent to Tally:</h3>
+            <pre>@Model.XmlSent</pre>
+            @if (!string.IsNullOrEmpty(Model.TallyRawResponse))
+            {
+                <h3 style="margin-top: 20px;">Tally Response:</h3>
+                <pre>@Model.TallyRawResponse</pre>
+            }
+        </div>
+    }
+
+    <form method="post">
+        <div class="section">
+            <h2>Basic Information</h2>
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="voucher_number">Voucher Number:</label>
+                    <input asp-for="Form.VoucherNumber" id="voucher_number" required />
+                </div>
+                <div class="form-group">
+                    <label for="date">Date (YYYYMMDD):</label>
+                    <input asp-for="Form.Date" id="date" required />
+                </div>
+                <div class="form-group">
+                    <label for="voucher_type">Voucher Type:</label>
+                    <select asp-for="Form.VoucherType" id="voucher_type" required>
+                        <option value="AUR BANK PAYMENT">AUR BANK PAYMENT</option>
+                        <option value="MUM BANK PAYMENT" selected>MUMBAI BANK PAYMENT</option>
+                        <option value="DEL BANK PAYMENT">Ako BANK PAYMENT</option>
+                        <option value="CHEQUE PAYMENT">CHEQUE PAYMENT</option>
+                        <option value="CASH PAYMENT">CASH PAYMENT</option>
+                        <option value="NEFT PAYMENT">NEFT PAYMENT</option>
+                        <option value="RTGS PAYMENT">RTGS PAYMENT</option>
+                        <option value="IMPS PAYMENT">IMPS PAYMENT</option>
+                        <option value="UPI PAYMENT">UPI PAYMENT</option>
+                        <option value="DD PAYMENT">DEMAND DRAFT PAYMENT</option>
+                    </select>
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="narration">Narration:</label>
+                <textarea asp-for="Form.Narration" id="narration" rows="3" required>BEING AMOUNT PAID AGAINST BILL NO-</textarea>
+            </div>
+            <div class="form-group">
+                <label for="entered_by">Entered By:</label>
+                <input asp-for="Form.EnteredBy" id="entered_by" required />
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>Party Information</h2>
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="party_ledger">Party Ledger Name:</label>
+                    <input asp-for="Form.PartyLedger" id="party_ledger" required />
+                </div>
+                <div class="form-group">
+                    <label for="party_name">Party Name:</label>
+                    <input asp-for="Form.PartyName" id="party_name" required />
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="bill_no">Bill/Reference No:</label>
+                    <input asp-for="Form.BillNo" id="bill_no" required />
+                </div>
+                <div class="form-group">
+                    <label for="bill_date">Bill Date (DD-MMM-YY):</label>
+                    <input asp-for="Form.BillDate" id="bill_date" />
+                </div>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>Bank Information</h2>
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="bank_account">Bank Account:</label>
+                    <select asp-for="Form.BankAccount" id="bank_account" required>
+                        <option value="HDFC Bank">HDFC Bank</option>
+                        <option value="SBI Bank">SBI Bank</option>
+                        <option value="ICICI Bank">ICICI Bank</option>
+                        <option value="SBI MUMBAI-57615" selected>SBI MUMBAI-57615</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="amount">Amount:</label>
+                    <input asp-for="Form.Amount" id="amount" type="number" step="0.01" required />
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="payment_mode">Payment Mode:</label>
+                    <select asp-for="Form.PaymentMode" id="payment_mode" required>
+                        <option value="Cheque">Cheque</option>
+                        <option value="DD">Demand Draft</option>
+                        <option value="NEFT">NEFT</option>
+                        <option value="RTGS">RTGS</option>
+                        <option value="IMPS" selected>IMPS</option>
+                        <option value="Transacted">Transacted</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="instrument_no">Cheque/DD/Ref No:</label>
+                    <input asp-for="Form.InstrumentNo" id="instrument_no" />
+                </div>
+                <div class="form-group">
+                    <label for="instrument_date">Instrument Date (YYYYMMDD):</label>
+                    <input asp-for="Form.InstrumentDate" id="instrument_date" />
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="payment_favouring">Payment Favouring:</label>
+                    <input asp-for="Form.PaymentFavouring" id="payment_favouring" />
+                </div>
+                <div class="form-group">
+                    <label for="transaction_type">Transaction Type:</label>
+                    <input asp-for="Form.TransactionType" id="transaction_type" />
+                </div>
+                <div class="form-group">
+                    <label for="transfer_mode">Transfer Mode:</label>
+                    <input asp-for="Form.TransferMode" id="transfer_mode" />
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="unique_reference">Unique Reference Number:</label>
+                <input asp-for="Form.UniqueReference" id="unique_reference" />
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>Additional Information</h2>
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="cost_center">Cost Center:</label>
+                    <input asp-for="Form.CostCenter" id="cost_center" />
+                </div>
+                <div class="form-group">
+                    <label for="gst_registration_type">GST Registration Type:</label>
+                    <select asp-for="Form.GstRegistrationType" id="gst_registration_type">
+                        <option value="Unregistered/Consumer" selected>Unregistered/Consumer</option>
+                        <option value="Regular">Regular</option>
+                        <option value="Composition">Composition</option>
+                    </select>
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="state_name">State Name:</label>
+                    <input asp-for="Form.StateName" id="state_name" />
+                </div>
+                <div class="form-group">
+                    <label for="place_of_supply">Place of Supply:</label>
+                    <input asp-for="Form.PlaceOfSupply" id="place_of_supply" />
+                </div>
+            </div>
+        </div>
+
+        <button type="submit">Create Bank Payment in Tally</button>
+    </form>
+
+    <div style="margin-top: 30px; padding: 15px; background-color: #e7f3fe; border-radius: 4px;">
+        <h3>Tally Configuration Instructions</h3>
+        <ol>
+            <li>Ensure Tally.ERP 9 (or TallyPrime) is running with HTTP server enabled</li>
+            <li>Set server port to 9000 (default)</li>
+            <li>Make sure the company "SHREE AMBIKA PRINTERS AND PUBLICATIONS" exists in Tally</li>
+            <li>Verify all ledger accounts exist in Tally</li>
+            <li>Check Tally logs for detailed error information if issues occur</li>
+        </ol>
+    </div>
+</div>
+
+<style>
+    body { font-family: Arial, sans-serif; line-height: 1.6; margin: 0; padding: 20px; background-color: #f5f5f5; }
+    .container { max-width: 1000px; margin: 0 auto; background-color: white; padding: 20px; border-radius: 5px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
+    h1, h2 { color: #333; }
+    .form-group { margin-bottom: 15px; }
+    label { display: block; margin-bottom: 5px; font-weight: bold; }
+    input, textarea, select { width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; box-sizing: border-box; }
+    button { background-color: #4CAF50; color: white; padding: 10px 15px; border: none; border-radius: 4px; cursor: pointer; font-size: 16px; }
+    button:hover { background-color: #45a049; }
+    .response { margin-top: 20px; padding: 15px; border-radius: 4px; }
+    .success { background-color: #dff0d8; color: #3c763d; border: 1px solid #d6e9c6; }
+    .error { background-color: #f2dede; color: #a94442; border: 1px solid #ebccd1; }
+    .xml-preview { margin-top: 20px; padding: 15px; background-color: #f0f0f0; border-radius: 4px; font-family: monospace; white-space: pre-wrap; max-height: 300px; overflow-y: auto; }
+    .form-row { display: flex; gap: 15px; }
+    .form-row .form-group { flex: 1; }
+    .response-details { margin-top: 10px; padding: 10px; background-color: #f8f9fa; border-radius: 4px; }
+    .section { margin-top: 20px; padding: 15px; background-color: #f8f9fa; border-radius: 4px; }
+    .section h2 { margin-top: 0; color: #2c3e50; }
+</style>
